@@ -7,9 +7,9 @@ public class TourretMovement : MonoBehaviour
     void Update()
     {
         if (Input.mousePosition.x < 0 || Input.mousePosition.y < 0 ||
-        Input.mousePosition.x > Screen.width || Input.mousePosition.y > Screen.height)
+            Input.mousePosition.x > Screen.width || Input.mousePosition.y > Screen.height)
         {
-            return; // Ignore invalid values
+            return;
         }
 
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(
@@ -17,11 +17,13 @@ public class TourretMovement : MonoBehaviour
             Camera.main.transform.position.y - transform.position.y));
 
         Vector3 direction = mousePosition - transform.position;
+        direction.y = 0; 
 
         if (direction != Vector3.zero)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
         }
     }
+
 }

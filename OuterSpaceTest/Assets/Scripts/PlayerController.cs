@@ -14,9 +14,9 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
 
     private Vector3 MoveDirections;
-    private bool isGrounded = true;
+    //private bool isGrounded = true;
 
-    private int JumpCount = 3;
+    public int JumpCount = 3;
     public Transform SafeLocation;
 
     public GameObject GameOverUi;
@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-
+        InvisUi.SetActive(false);
     }
 
     private void Update()
@@ -68,10 +68,11 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Ground"))
+       /* if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
-        }
+        }*/
+
         if (collision.gameObject.CompareTag("Asteroid"))
         {
             if (JumpCount <= 0)
@@ -104,10 +105,11 @@ public class PlayerController : MonoBehaviour
         isInvincible = true;
         playerCollider.isTrigger = true;
         InvisUi.SetActive(true);
+
         yield return new WaitForSeconds(5f);
 
         playerCollider.isTrigger = false;
         isInvincible = false;
-        InvisUi.SetActive(false);
+        //InvisUi.SetActive(false);
     }
 }

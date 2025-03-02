@@ -24,7 +24,11 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        ScoreUi.text = "Score : " + score.ToString();
+        if(ScoreUi != null)
+        {
+            ScoreUi.text = "Score : " + score.ToString();
+        }
+        
     }
 
     public void AddScore(int points)
@@ -38,5 +42,10 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("Game");
+    }
+
+    public void StartScene()
+    {
+        SceneManager.LoadScene("LoadingScreen");
     }
 }
