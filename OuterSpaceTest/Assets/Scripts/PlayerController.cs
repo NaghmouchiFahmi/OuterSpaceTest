@@ -2,47 +2,42 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerController : MonoBehaviour
 {
 
-
-    public float MoveSpeed = 10f;
-    //private float SprintSpeed = 20f;
-    public float JumpForce = 8f;
+    public float normalSpeed = 15f;
+    public float CurrentSpeed = 0;
+    public float InvisibilityTime = 10f;
+    public float boostedSpeed = 10f;
 
     private Rigidbody rb;
-
+    private Collider playerCollider;
     private Vector3 MoveDirections;
-    //private bool isGrounded = true;
-
-    public int JumpCount = 3;
     public Transform SafeLocation;
 
-    public GameObject GameOverUi;
-
+    private bool isSpeedBoosted = false;
     private bool isInvincible = false;
-    private Collider playerCollider;
 
     public GameObject InvisUi;
-    public TextMeshProUGUI JumpsUi;
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         InvisUi.SetActive(false);
+        playerCollider= GetComponent<Collider>();
+        CurrentSpeed = normalSpeed;
     }
 
     private void Update()
     {
-        //HandleJump();
-        JumpsUi.text = JumpCount.ToString();
+        
     }
 
     private void FixedUpdate()
     {
         HandleMovements();
-
     }
 
     public void HandleMovements()
@@ -52,40 +47,41 @@ public class PlayerController : MonoBehaviour
 
         MoveDirections = new Vector3(XMove, 0, ZMove).normalized;
 
-       // float currentSpeed = Input.GetKey(KeyCode.LeftShift) ? SprintSpeed : MoveSpeed;
 
-        rb.MovePosition(rb.position + MoveDirections * MoveSpeed * Time.fixedDeltaTime);
+        if (MoveDirections != Vector3.zero)
+        {
+            
+            Vector3 newPosition = rb.position + MoveDirections * CurrentSpeed * Time.deltaTime;
+            rb.MovePosition(newPosition);
+
+            Quaternion targetRotation = Quaternion.LookRotation(-MoveDirections);
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 1f * Time.deltaTime));
+        }
+
     }
 
-   /* public void HandleJump()
+
+    private void UpdateCameraPosition()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded && JumpCount > 0)
-        {
-            rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
-            isGrounded = false;
-        }
-    }*/
+        Vector3 cameraOffset = new Vector3(0, 10, -10); 
+        Vector3 targetPosition = rb.position + cameraOffset;
+        Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, targetPosition, 0.1f);
+
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
-       /* if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }*/
+       
 
         if (collision.gameObject.CompareTag("Asteroid"))
         {
-            if (JumpCount <= 0)
-            {
-                Time.timeScale = 0f;
-                GameOverUi.SetActive(true);
-            }
-            else
-            {
-                JumpCount--;
-                gameObject.transform.position = SafeLocation.position;
+           
+            
+                GameManager.Instance.JumpCount--;
+            Destroy(collision.gameObject);
+            gameObject.transform.position = SafeLocation.position;
                 
-            }
+            
         }
 
 
@@ -96,20 +92,48 @@ public class PlayerController : MonoBehaviour
     {
         if (!isInvincible)
         {
+            
+            isInvincible = true;
+            InvisUi.SetActive(true);
+
+            playerCollider.isTrigger = true;
             StartCoroutine(InvincibilityCoroutine());
         }
     }
 
     private IEnumerator InvincibilityCoroutine()
     {
-        isInvincible = true;
-        playerCollider.isTrigger = true;
-        InvisUi.SetActive(true);
-
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(InvisibilityTime);
 
         playerCollider.isTrigger = false;
         isInvincible = false;
-        //InvisUi.SetActive(false);
+        InvisUi.SetActive(false);
+
+
+
     }
+
+    public void ActivateSpeedBoost(float duration)
+    {
+        if (!isSpeedBoosted)
+        {
+            isSpeedBoosted = true;
+            CurrentSpeed = boostedSpeed;
+            StartCoroutine(SpeedBoostCoroutine(duration));
+        }
+    }
+
+    private IEnumerator SpeedBoostCoroutine(float duration)
+    {
+        
+
+        yield return new WaitForSeconds(duration);
+
+        CurrentSpeed = normalSpeed;
+        isSpeedBoosted = false;
+        
+    }
+
+
+
 }

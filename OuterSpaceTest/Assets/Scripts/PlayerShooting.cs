@@ -11,7 +11,7 @@ public class PlayerShooting : MonoBehaviour
     public int maxShots = 0;
     public float cooldownTime = 5f;
     private bool isCooldown = false;
-
+    public float BulletDestroyTime = 2f;
     void Update()
     {
         if (Input.GetMouseButtonDown(0) && !isCooldown) 
@@ -30,8 +30,7 @@ public class PlayerShooting : MonoBehaviour
             GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
 
             bullet.GetComponent<Rigidbody>().AddForce(-firePoint.forward * bulletSpeed, ForceMode.Impulse);
-            Debug.DrawRay(firePoint.position, -firePoint.forward * 10, Color.red, 2f);
-            Destroy(bullet, 2f);
+            Destroy(bullet, BulletDestroyTime);
 
             ShotFired++;
 
